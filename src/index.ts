@@ -14,7 +14,12 @@ async function main(target: string, options: BuildOption) {
     if (!stat.isDirectory()) {
       throw new Error(`Build target "${target}" must be directory`);
     }
-    const sources = glob.sync(`${target}/**/*.html`);
+    const sources = glob.sync(`${target}/**/*.html`, {
+      ignore: [
+        "node_modules/*",
+      ],
+      dot: true,
+    });
     const builders = await Promise.all(sources.map(src => builder({ src, event, options, target })));
 
     if (options.server) {
