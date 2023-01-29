@@ -9,7 +9,7 @@
   "author": "ysugimoto <sugimoto@wnotes.net>",
   "license": "MIT",
   "devDependencies": {
-    "@types/browser-sync": "^2.26.3",
+    "@types/glob": "^8.0.1",
     "@types/html-minifier": "^4.0.2",
     "@types/node": "^18.11.18",
     "@types/ws": "^8.5.4",
@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "@fastify/websocket": "^7.1.2",
-    "@types/glob": "^8.0.1",
     "cheerio": "^1.0.0-rc.12",
     "chokidar": "^3.5.3",
     "commander": "^10.0.0",
