@@ -1,5 +1,24 @@
 import fs from "node:fs";
 import path from "node:path";
+import * as esbuild from "esbuild";
+import sass from "sass";
+
+export async function buildScript(src: string): Promise<string> {
+  const result = await esbuild.build({
+    entryPoints: [src],
+    write: false,
+    format: "iife",
+    bundle: true,
+    minify: true,
+  });
+
+  return new TextDecoder().decode(result.outputFiles[0].contents);
+}
+
+export async function buildCSS(file: string): Promise<string> {
+  const result = sass.compile(file, { style: "compressed" });
+  return result.css;
+}
 
 export async function buildImage(src: string): Promise<string> {
   if (!fs.existsSync(src)) {

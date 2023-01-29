@@ -2,11 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { error, info } from "../logger";
-
-export type BuildCommand = {
-  js?: string;
-  css?: string;
-}
+import type { BuildCommand, BuildArgs } from "./types";
 
 type PackageJsonScripts = Record<string, string>;
 
@@ -28,16 +24,10 @@ export async function findBuildCommand(dir: string): Promise<BuildCommand> {
     if (pkgJson.scripts["unifee:css"]) {
       cmd.css = pkgJson.scripts["unifee:css"];
     }
-    return cmd;
   } catch (err) {
-    return {};
+    // supress error
   }
-}
-
-type BuildArgs = {
-  command: "npm" | "yarn";
-  cwd: string;
-  build: string;
+  return cmd;
 }
 
 export async function runBuild({ command, cwd, build }: BuildArgs): Promise<void> {

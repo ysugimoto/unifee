@@ -5,18 +5,10 @@ import { randomUUID } from "node:crypto";
 import cheerio from "cheerio";
 import chokidar from "chokidar";
 import { minify } from "html-minifier";
-import { buildScript } from "./build-script";
-import { buildCSS } from "./build-css";
-import { buildImage } from "./build-image";
+import { buildScript, buildCSS, buildImage } from "./assets";
 import { log } from "../logger";
-import { findBuildCommand, runBuild, type BuildCommand } from "./command";
-
-export type BuildOption = {
-  server: boolean;
-  output: string;
-  yarn: boolean;
-  watch: boolean;
-};
+import { findBuildCommand, runBuild } from "./command";
+import type { BuildOption, BuildCommand, BuilderArgs } from "./types";
 
 const hotreload = `
 <script>
@@ -26,13 +18,6 @@ const hotreload = `
 })();
 </script>
 `;
-
-type BuilderArgs = {
-  src: string;
-  event: EventEmitter;
-  options: BuildOption;
-  target: string;
-}
 
 export function builder(args: BuilderArgs): Builder {
   return Builder.create(args);
