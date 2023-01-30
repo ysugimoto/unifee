@@ -12,7 +12,7 @@ export function server(builders: Array<Builder>, event: EventEmitter) {
   const connections = new Map<string, SocketStream>();
   server.register(fastifyWebsocket);
   server.register(async (fastify) => {
-    fastify.get("/__hotreload", { websocket: true }, (conn, _) => {
+    fastify.get("/__hotreload", { websocket: true }, (conn) => {
       const id = randomUUID();
       connections.set(id, conn);
       conn.socket.on("close", () => {
@@ -26,8 +26,8 @@ export function server(builders: Array<Builder>, event: EventEmitter) {
       const url = new URL(request.url || "/", `http://${request.headers.host}`);
       const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
 
-      const file = builders.find(b => b.match(pathname));
-      return (file)
+      const file = builders.find((b) => b.match(pathname));
+      return file
         ? reply.type("text/html").status(200).send(file.html)
         : reply.type("text/plain").status(404).send("Not Found");
     });
@@ -38,12 +38,14 @@ export function server(builders: Array<Builder>, event: EventEmitter) {
       error(`${err}`);
       return;
     }
-    log(`Dev server started on http://${address}`);
+    log(`Dev server started on ${address}`);
     event.on("hotreload", () => {
       warn("Browser reloading...");
-      for (const conn of connections.values()) {
-        conn.socket.send("hotreload");
-      }
+      setTimeout(() => {
+        for (const conn of connections.values()) {
+          conn.socket.send("hotreload");
+        }
+      }, 300);
     });
   });
 }

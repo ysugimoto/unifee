@@ -12,16 +12,15 @@ export type BuilderArgs = {
   event: EventEmitter;
   options: BuildOption;
   target: string;
-}
+};
 
 export type BuildCommand = {
   js?: string;
   css?: string;
-}
+};
 
 export type BuildArgs = {
   command: "npm" | "yarn";
   cwd: string;
   build: string;
-}
-
+};

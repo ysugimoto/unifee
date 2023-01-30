@@ -15,12 +15,12 @@ async function main(target: string, options: BuildOption) {
       throw new Error(`Build target "${target}" must be directory`);
     }
     const sources = glob.sync(`${target}/**/*.html`, {
-      ignore: [
-        "node_modules/*",
-      ],
+      ignore: ["node_modules/*"],
       dot: true,
     });
-    const builders = await Promise.all(sources.map(src => builder({ src, event, options, target })));
+    const builders = await Promise.all(
+      sources.map(async (src) => builder({ src, event, options, target }))
+    );
 
     if (options.server) {
       server(builders, event);
@@ -34,7 +34,9 @@ async function main(target: string, options: BuildOption) {
 }
 
 (async () => {
-  const pkg = JSON.parse(await fs.promises.readFile(path.join(__dirname, "../package.json"), "utf8"));
+  const pkg = JSON.parse(
+    await fs.promises.readFile(path.join(__dirname, "../package.json"), "utf8")
+  );
   const program = new Command();
 
   program

@@ -2,6 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import * as esbuild from "esbuild";
 import sass from "sass";
+import sharp from "sharp";
+import { optimize } from "svgo";
+import { log } from "../logger";
 
 export async function buildScript(src: string): Promise<string> {
   const result = await esbuild.build({
@@ -27,24 +30,36 @@ export async function buildImage(src: string): Promise<string> {
 
   const buffer = await fs.promises.readFile(src);
   let mime: string;
+  let image: Buffer;
   switch (path.extname(src).toLowerCase()) {
-  case ".png":
+    case ".svg":
+      mime = "image/svg+xml";
+      image = Buffer.from(
+        optimize(buffer.toString("utf8"), { path: src }).data
+      );
+      break;
+    case ".png":
       mime = "image/png";
+      image = await sharp(buffer).png().toBuffer();
       break;
-  case ".jpg":
-  case ".jpeg":
+    case ".jpg":
+    case ".jpeg":
       mime = "image/jpeg";
+      image = await sharp(buffer).jpeg({ mozjpeg: true }).toBuffer();
       break;
-  case ".gif":
+    case ".gif":
       mime = "image/gif";
+      image = await sharp(buffer).gif().toBuffer();
       break;
-  default:
+    default:
       throw new Error("Unsupported image");
   }
 
-  if (Buffer.isBuffer(buffer)) {
-    return `data:${mime};base64,${buffer.toString("base64")}`;
-  } else {
-    return `data:${mime};base64,${Buffer.from(buffer).toString("base64")}`;
+  if (buffer.byteLength > image.byteLength) {
+    log(
+      `${src} optimized: ${buffer.byteLength} bytes -> ${image.byteLength} bytes`
+    );
   }
+
+  return `data:${mime};base64,${image.toString("base64")}`;
 }

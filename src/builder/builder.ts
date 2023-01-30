@@ -6,7 +6,7 @@ import cheerio from "cheerio";
 import chokidar from "chokidar";
 import { minify } from "html-minifier";
 import { buildScript, buildCSS, buildImage } from "./assets";
-import { log } from "../logger";
+import { log, error } from "../logger";
 import { findBuildCommand, runBuild } from "./command";
 import type { BuildOption, BuildCommand, BuilderArgs } from "./types";
 
@@ -19,7 +19,7 @@ const hotreload = `
 </script>
 `;
 
-export function builder(args: BuilderArgs): Builder {
+export async function builder(args: BuilderArgs): Promise<Builder> {
   return Builder.create(args);
 }
 
@@ -28,7 +28,7 @@ export class Builder {
   private options: BuildOption;
   private command: Promise<BuildCommand>;
   private target: string;
-  public html: string = "";
+  public html = "";
 
   constructor(src: string, target: string, options: BuildOption) {
     this.file = src;
@@ -37,10 +37,21 @@ export class Builder {
     this.command = findBuildCommand(path.dirname(src));
   }
 
-  public static create({ src, event, options, target }: BuilderArgs): Builder {
+  public static async create({
+    src,
+    event,
+    options,
+    target,
+  }: BuilderArgs): Promise<Builder> {
     const builder = new Builder(src, target, options);
-    builder.build();
-    if (options.watch) {
+    try {
+      await builder.build();
+    } catch (err) {
+      error(`Failed to build: ${err}`);
+      builder.html = err instanceof Error ? err.message : `${err}`;
+    }
+
+    if (options.watch || options.server) {
       builder.watch(event);
     }
     return builder;
@@ -55,22 +66,26 @@ export class Builder {
   }
 
   private async buildProject(command: BuildCommand): Promise<unknown> {
-    const cwd = path.dirname(this.file);
+    const cwd = path.join(process.cwd(), this.target);
 
     const procs: Array<Promise<void>> = [];
     if (command.js) {
-      procs.push(runBuild({
-        command: this.options.yarn ? "yarn" : "npm",
-        cwd,
-        build: command.js,
-      }));
+      procs.push(
+        runBuild({
+          command: this.options.yarn ? "yarn" : "npm",
+          cwd,
+          build: command.js,
+        })
+      );
     }
     if (command.css) {
-      procs.push(runBuild({
-        command: this.options.yarn ? "yarn" : "npm",
-        cwd,
-        build: command.css,
-      }));
+      procs.push(
+        runBuild({
+          command: this.options.yarn ? "yarn" : "npm",
+          cwd,
+          build: command.css,
+        })
+      );
     }
 
     return Promise.all(procs);
@@ -78,7 +93,9 @@ export class Builder {
 
   public async build() {
     const start = Date.now();
-    const $ = cheerio.load(await fs.promises.readFile(this.file), { decodeEntities: true });
+    const $ = cheerio.load(await fs.promises.readFile(this.file), {
+      decodeEntities: true,
+    });
 
     const command = await this.command;
     await this.buildProject(command);
@@ -86,7 +103,7 @@ export class Builder {
     for (const script of $("script")) {
       const src = $(script).attr("src");
       if (src && !/^https?:\/\//.test(src)) {
-        const inline = (command.js)
+        const inline = command.js
           ? await fs.promises.readFile(this.getPath(src))
           : await buildScript(this.getPath(src));
         $(script).replaceWith(`<script>${inline}</script>`);
@@ -97,7 +114,7 @@ export class Builder {
       if ($(link).attr("rel")?.toLowerCase() === "stylesheet") {
         const href = $(link).attr("href");
         if (href && !/^https?:\/\//.test(href)) {
-          const inline = (command.css)
+          const inline = command.css
             ? await fs.promises.readFile(this.getPath(href))
             : await buildCSS(this.getPath(href));
           $(link).replaceWith(`<style>${inline}</style>`);
@@ -105,13 +122,18 @@ export class Builder {
       }
     }
 
+    const imagePromises: Array<Promise<void>> = [];
     for (const img of $("img")) {
       const src = $(img).attr("src");
       if (src && !/^https?:\/\//.test(src)) {
-        const i = await buildImage(this.getPath(src));
-        $(img).attr("src", i);
+        imagePromises.push(
+          buildImage(this.getPath(src)).then((buffer) => {
+            $(img).attr("src", buffer);
+          })
+        );
       }
     }
+    await Promise.all(imagePromises);
 
     if (this.options.server) {
       const head = $("head");
@@ -140,8 +162,12 @@ export class Builder {
 
     event.on(`assets:${id}`, async () => {
       log(`Related asset of ${path.basename(this.file)} is changed, rebuild`);
-      await this.build();
-      event.emit("hotreload");
+      try {
+        await this.build();
+        event.emit("hotreload");
+      } catch (err) {
+        error(`Failed to build: ${err}`);
+      }
     });
 
     const watcher = chokidar.watch(dir, { persistent: true });
@@ -154,7 +180,10 @@ export class Builder {
   }
 
   private async output(): Promise<void> {
-    const dest = path.resolve(process.cwd(), this.options.output || this.target);
+    const dest = path.resolve(
+      process.cwd(),
+      this.options.output || this.target
+    );
 
     try {
       await fs.promises.stat(dest);
@@ -165,7 +194,7 @@ export class Builder {
     return fs.promises.writeFile(
       path.join(dest, path.basename(this.file)),
       this.html,
-      "utf8",
+      "utf8"
     );
   }
 }
@@ -184,4 +213,3 @@ const watchExtensions = [
   // ".jsx",
   // ".tsx",
 ];
-
