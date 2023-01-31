@@ -130,3 +130,11 @@ $ npx unifee ./src -w
 ```
 
 Find HTML files into `src`, bundles into single file with watching file changes.
+
+## Author
+
+Yoshiaki Sugimoto <sugimoto@wnotes.net>
+
+## License
+
+MIT

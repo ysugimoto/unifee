@@ -1,0 +1,7 @@
+example
+src
+tsconfig.json
+.eslint*
+.github
+.husky
+
