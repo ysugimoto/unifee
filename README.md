@@ -29,26 +29,7 @@ $ yarn add unifee
 
 unifee is cli tool so you can run it on npm package scripts.
 
-```shell
-Usage: unifee [options] <directory>
-
-Unify assets into single HTML file
-
-Arguments:
-  directory                 build source directory
-
-Options:
-  -V, --version             output the version number
-  -o, --output <directory>  output target directory
-  -s, --server              run dev server and watch changes (default: false)
-  -w, --watch               watch source file change
-  --yarn                    use yarn instead of npm on project build (default: false)
-  -h, --help                display help for command
-```
-
-unifee supports to bundle TypeScript and SCSS, describe following.
-
-### Basic usage
+### Basic
 
 ```html
 <!doctype html>
@@ -105,6 +86,23 @@ unifee support some mimetypes and languages following table:
 | `<img src="path/to/image.svg">`                      | image/svg+xml        | [svgo](https://github.com/svg/svgo)          | data-uri |
 
 ## CLI commands
+
+```shell
+Usage: unifee [options] <directory>
+
+Unify assets into single HTML file
+
+Arguments:
+  directory                 build source directory
+
+Options:
+  -V, --version             output the version number
+  -o, --output <directory>  output target directory
+  -s, --server              run dev server and watch changes (default: false)
+  -w, --watch               watch source file change
+  --yarn                    use yarn instead of npm on project build (default: false)
+  -h, --help                display help for command
+```
 
 We show some examples following.
 
