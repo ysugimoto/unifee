@@ -1,5 +1,8 @@
-# unifee
+<p align="center">
+<img src="https://user-images.githubusercontent.com/1000401/215708088-88828821-1383-448c-adda-169a0812b094.svg">
+</p>
 
+# unifee
 unifee is Edge friendly bundler, all assets bundle into a single HTML.
 
 ## Motivation
@@ -87,6 +90,19 @@ See [example/project](https://github.com/ysugimoto/unifee/tree/main/example/proj
 ```
 Note that if you have own build scripts, make sure the build artifact is referenced from entry HTML file.
 ```
+
+unifee support some mimetypes and languages following table:
+
+| Find in HTML                                         | Language / MimeTypes | Compile / Optimize with                      | Bundle   |
+|:-----------------------------------------------------|:--------------------:|:--------------------------------------------:|:--------:|
+| `<script src="path/to/script.ts"></script>`          | TypeScript           | [esbuild](https://esbuild.github.io/)        | inline   |
+| `<script src="path/to/script.js"></script>`          | JavaScript           | [esbuild](https://esbuild.github.io/)        | inline   |
+| `<link rel="stylesheet" href="path/to/styles.scss">` | SCSS                 | [dart-sass](https://sass-lang.com/dart-sass) | inline   |
+| `<link rel="stylesheet" href="path/to/styles.css">`  | CSS                  | [dart-sass](https://sass-lang.com/dart-sass) | inline   |
+| `<img src="path/to/image.png">`                      | image/png            | [sharp](https://sharp.pixelplumbing.com/)    | data-uri |
+| `<img src="path/to/image.jpg">`                      | image/jpeg           | [sharp](https://sharp.pixelplumbing.com/)    | data-uri |
+| `<img src="path/to/image.gif">`                      | image/gif            | [sharp](https://sharp.pixelplumbing.com/)    | data-uri |
+| `<img src="path/to/image.svg">`                      | image/svg+xml        | [svgo](https://github.com/svg/svgo)          | data-uri |
 
 ## CLI commands
 
