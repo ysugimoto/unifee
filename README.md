@@ -9,7 +9,7 @@ unifee is Edge friendly bundler, all assets bundle into a single HTML.
 
 Since Edge Computing Platforms (e.g Cloudflare Workers, Fastly Compute@Edge, etc...) are prepared for production use, occasinally we want to server static contents on the Edge, without origin server.
 
-To server them, it's annoying to route static assets for each paths. It occurs multiple HTTP requests and needs to bundle for each assets into runtime binary (WASM). We'd like to server more simply so we developed easy bundle tool that bundles optimized all assets into single HTML file, we dont' need to think about asset routing and also caching at the Edge for single endpoint.
+To serve them, it's annoying to route static assets for each paths. It occurs multiple HTTP requests and needs to bundle for each assets into runtime binary (WASM). We'd like to server more simply so we developed easy bundle tool that bundles optimized all assets into single HTML file, we dont' need to think about asset routing and also caching at the Edge for single endpoint.
 
 unifee provides underlying features for development, local server, JavaScript (TypeScript) and CSS compiling, image optimization.
 
