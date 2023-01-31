@@ -1,9 +1,9 @@
 {
   "name": "unifee",
   "version": "0.3.0",
-  "main": "dist/index.js",
+  "main": "dist/unifee.js",
   "bin": {
-    "unifee": "dist/index.js"
+    "unifee": "dist/unifee.js"
   },
   "repository": "https://github.com/ysugimoto/unifee",
   "author": "ysugimoto <sugimoto@wnotes.net>",
@@ -43,7 +43,7 @@
   "scripts": {
     "example:basic": "ts-node src/index.ts ./example/basic -o output -s",
     "example:project": "ts-node src/index.ts ./example/project -o output -s",
-    "build": "tsc",
+    "build": "tsc && cp bin/unifee.js dist/",
     "lint": "eslint --fix --ext .ts ./src",
     "clean": "rimraf dist/*",
     "prepare": "husky install"
