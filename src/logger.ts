@@ -10,6 +10,11 @@ function red(message: string): string {
 
 const prefix = green("[unifee] ");
 
+// Common colored log functions,
+// log: white
+// info: green
+// warn: yellow
+// error: red
 export function log(message: string) {
   process.stderr.write(`${prefix}${message}\n`);
 }

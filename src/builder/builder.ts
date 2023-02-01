@@ -10,6 +10,7 @@ import { log, error } from "../logger";
 import { findBuildCommand, runBuild } from "./command";
 import type { BuildOption, BuildCommand, BuilderArgs } from "./types";
 
+// hot reload script, inject to build HTML is server mode is enabled
 const hotreload = `
 <script>
 (function() {
@@ -23,11 +24,26 @@ export async function builder(args: BuilderArgs): Promise<Builder> {
   return Builder.create(args);
 }
 
+// Main builder class, manage assets build
 export class Builder {
+  // Source HTML file path
+  // @private
   private file: string;
+
+  // CLI options
+  // @private
   private options: BuildOption;
+
+  // Project specific build commans
+  // @private
   private command: Promise<BuildCommand>;
+
+  // Target directory
+  // @private
   private target: string;
+
+  // Build HTML buffer
+  // @public
   public html = "";
 
   constructor(src: string, target: string, options: BuildOption) {
@@ -44,6 +60,7 @@ export class Builder {
     target,
   }: BuilderArgs): Promise<Builder> {
     const builder = new Builder(src, target, options);
+
     try {
       await builder.build();
     } catch (err) {
@@ -51,25 +68,34 @@ export class Builder {
       builder.html = err instanceof Error ? err.message : `${err}`;
     }
 
+    // If '-w' or '-s' cli option is provided, watch changes
     if (options.watch || options.server) {
       builder.watch(event);
     }
+
     return builder;
   }
 
+  // match, requested url is matched to source file name
+  // @public
   public match(pathname: string): boolean {
     return pathname === `/${path.basename(this.file)}`;
   }
 
+  // Get asset path, relative to source file
+  // @private
   private getPath(src: string): string {
     return path.join(path.dirname(this.file), src);
   }
 
+  // Project specific build if needs
+  // @private
   private async buildProject(command: BuildCommand): Promise<unknown> {
     const cwd = path.join(process.cwd(), this.target);
 
     const procs: Array<Promise<void>> = [];
     if (command.js) {
+      // unifee:js
       procs.push(
         runBuild({
           command: this.options.yarn ? "yarn" : "npm",
@@ -79,6 +105,7 @@ export class Builder {
       );
     }
     if (command.css) {
+      // unifee:css
       procs.push(
         runBuild({
           command: this.options.yarn ? "yarn" : "npm",
@@ -91,12 +118,15 @@ export class Builder {
     return Promise.all(procs);
   }
 
+  // Build HTML file
+  // @public
   public async build() {
     const start = Date.now();
     const $ = cheerio.load(await fs.promises.readFile(this.file), {
       decodeEntities: true,
     });
 
+    // If project specific build commands are found, run them
     const command = await this.command;
     await this.buildProject(command);
 
@@ -122,6 +152,7 @@ export class Builder {
       }
     }
 
+    // Image optimization sould be run asynchronousely
     const imagePromises: Array<Promise<void>> = [];
     for (const img of $("img")) {
       const src = $(img).attr("src");
@@ -135,6 +166,7 @@ export class Builder {
     }
     await Promise.all(imagePromises);
 
+    // When server option is enabled, inject hot reload script
     if (this.options.server) {
       const head = $("head");
       if (head.length > 0) {
@@ -156,6 +188,7 @@ export class Builder {
     }
   }
 
+  // Watch and rebuild source file
   public watch(event: EventEmitter) {
     const id = randomUUID();
     const dir = path.dirname(this.file);
