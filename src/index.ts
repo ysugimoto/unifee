@@ -7,6 +7,7 @@ import { server } from "./server";
 import { log, error } from "./logger";
 import glob from "glob";
 
+// Main function, process target with provided CLI options
 async function main(target: string, options: BuildOption) {
   const event = new EventEmitter();
   try {
@@ -16,7 +17,7 @@ async function main(target: string, options: BuildOption) {
     }
     const sources = glob.sync(`${target}/**/*.html`, {
       ignore: ["node_modules/*"],
-      dot: true,
+      dot: false,
     });
     const builders = await Promise.all(
       sources.map(async (src) => builder({ src, event, options, target }))

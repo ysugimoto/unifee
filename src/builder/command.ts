@@ -6,6 +6,10 @@ import type { BuildCommand, BuildArgs } from "./types";
 
 type PackageJsonScripts = Record<string, string>;
 
+// project specific npm script name in package.json
+const projectJSBuildScriptName = "unifee:js";
+const projectCSSBuildScriptName = "unifee:css";
+
 export async function findBuildCommand(dir: string): Promise<BuildCommand> {
   const pkgJsonPath = path.join(dir, "package.json");
   if (!fs.existsSync(pkgJsonPath)) {
@@ -20,18 +24,19 @@ export async function findBuildCommand(dir: string): Promise<BuildCommand> {
     if (!pkgJson.scripts) {
       return cmd;
     }
-    if (pkgJson.scripts["unifee:js"]) {
-      cmd.js = "unifee:js";
+    if (pkgJson.scripts[projectJSBuildScriptName]) {
+      cmd.js = projectJSBuildScriptName;
     }
-    if (pkgJson.scripts["unifee:css"]) {
-      cmd.css = "unifee:css";
+    if (pkgJson.scripts[projectCSSBuildScriptName]) {
+      cmd.css = projectCSSBuildScriptName;
     }
   } catch (err) {
-    // supress error
+    // preventing error because this error will not affect to main build process
   }
   return cmd;
 }
 
+// Run project specific build script
 export async function runBuild({
   command,
   cwd,

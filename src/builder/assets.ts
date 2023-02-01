@@ -6,6 +6,7 @@ import sharp from "sharp";
 import { optimize } from "svgo";
 import { log } from "../logger";
 
+// JavaScript/TypeScript builds with esbuild
 export async function buildScript(src: string): Promise<string> {
   const result = await esbuild.build({
     entryPoints: [src],
@@ -18,11 +19,13 @@ export async function buildScript(src: string): Promise<string> {
   return new TextDecoder().decode(result.outputFiles[0].contents);
 }
 
+// SCSS/CSS builds with dart-sass
 export async function buildCSS(file: string): Promise<string> {
   const result = sass.compile(file, { style: "compressed" });
   return result.css;
 }
 
+// Build image with svgo or sharp
 export async function buildImage(src: string): Promise<string> {
   if (!fs.existsSync(src)) {
     throw new Error(`Image ${src} is not found`);
@@ -55,6 +58,7 @@ export async function buildImage(src: string): Promise<string> {
       throw new Error("Unsupported image");
   }
 
+  // Output log is images are actually optimized
   if (buffer.byteLength > image.byteLength) {
     log(
       `${src} optimized: ${buffer.byteLength} bytes -> ${image.byteLength} bytes`

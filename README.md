@@ -7,9 +7,9 @@ unifee is Edge friendly bundler, all assets bundle into a single HTML.
 
 ## Motivation
 
-Since Edge Computing Platforms (e.g Cloudflare Workers, Fastly Compute@Edge, etc...) are prepared for production use, occasinally we want to server static contents on the Edge, without origin server.
+Since Edge Computing Platforms (e.g Cloudflare Workers, Fastly Compute@Edge, etc...) are prepared for production use, occasionally we want to server static contents on the Edge, without origin server.
 
-To serve them, it's annoying to route static assets for each paths. It occurs multiple HTTP requests and needs to bundle for each assets into runtime binary (WASM). We'd like to server more simply so we developed easy bundle tool that bundles optimized all assets into single HTML file, we dont' need to think about asset routing and also caching at the Edge for single endpoint.
+To serve them, it's annoying to route static assets for each paths. It occurs multiple HTTP requests and needs to bundle for each assets into runtime binary (WASM). We'd like to server them more simply so we developed easy bundle tool that bundles optimized all assets into single HTML file, we dont' need to think about asset routing, only cache this file at the Edge for single endpoint.
 
 unifee provides underlying features for development, local server, JavaScript (TypeScript) and CSS compiling, image optimization.
 
@@ -26,8 +26,6 @@ $ yarn add unifee
 ```
 
 ## Usage
-
-unifee is cli tool so you can run it on npm package scripts.
 
 ### Basic
 
@@ -48,9 +46,9 @@ unifee is cli tool so you can run it on npm package scripts.
 
 On above HTML:
 
-1. Find "./styles.scss" and compile from SCSS to CSS, replace `<link>` into `<style>` as inline
-2. Find "./image.png" and optimize image, replace `src` attribute value as base64-encoded data-uri
-3. Find "./script.ts" and compile from TypeScript to JavaScript, append built script as inline
+1. Find `./styles.scss` and compile from SCSS to CSS, replace `<link>` into `<style>` as inline
+2. Find `./image.png` and optimize image, replace `src` attribute value as base64-encoded data-uri
+3. Find `./script.ts` and compile from TypeScript to JavaScript, append built `<script>` text content as inline
 
 Finally you will get single HTML file.
 See [example/basic](https://github.com/ysugimoto/unifee/tree/main/example/basic) in detail.
@@ -65,7 +63,7 @@ in project directory, you can define unifee spefic npm scripts like:
 | unifee:js   | Build JavaScript for your project way |
 | unifee:css  | Build CSS for your project way        |
 
-If unifee finds above scripts in project directory, use it instead of unifee internal build process.
+If unifee finds above scripts in project directory of `package.json`, use that npm script result instead of unifee default build process.
 See [example/project](https://github.com/ysugimoto/unifee/tree/main/example/project) in detail.
 
 ```
@@ -86,6 +84,8 @@ unifee support some mimetypes and languages following table:
 | `<img src="path/to/image.svg">`                      | image/svg+xml        | [svgo](https://github.com/svg/svgo)          | data-uri |
 
 ## CLI commands
+
+unifee is cli tool so you can run it on npm package scripts.
 
 ```shell
 Usage: unifee [options] <directory>

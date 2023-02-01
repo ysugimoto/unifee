@@ -6,9 +6,11 @@ import fastifyWebsocket, { SocketStream } from "@fastify/websocket";
 import { Builder } from "./builder";
 import { log, warn, error } from "./logger";
 
+// Run local server for checking built result
 export function server(builders: Array<Builder>, event: EventEmitter) {
   const server = fastify();
 
+  // To be enable hot-reload, we also run WebSocket server and communicate to browser
   const connections = new Map<string, SocketStream>();
   server.register(fastifyWebsocket);
   server.register(async (fastify) => {
